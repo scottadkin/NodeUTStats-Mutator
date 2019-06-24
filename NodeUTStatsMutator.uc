@@ -47,10 +47,12 @@ function int getPlayerIndex(PlayerReplicationInfo p){
 function int insertNewPlayer(Pawn p){
 	
 	local int i;
-	local StatLog log;
+	//local StatLog log;
 	local int id;
+
+
 	
-	log = Level.Game.LocalLog;
+//	log = Level.Game.LocalLog;
 	
 	for(i = 0; i < 64; i++){
 		
@@ -59,22 +61,39 @@ function int insertNewPlayer(Pawn p){
 
 			nPlayers[i].p = p.PlayerReplicationInfo;
 			nPlayers[i].id = p.PlayerReplicationInfo.PlayerID;
-			nPlayers[i].pawn = p;
+			//nPlayers[i].pawn = p;
 
-			id = p.PlayerReplicationInfo.PlayerId;
+			//id = p.PlayerReplicationInfo.PlayerID;
 			
 			//LOG("Inseted new player "$p.PlayerName);
-			log.LogEventString(log.GetTimeStamp()$Chr(9)$"nstats"$Chr(9)$"Face"$Chr(9)$id$Chr(9)$nPlayers[i].p.TalkTexture);
-			log.LogEventString(log.GetTimeStamp()$Chr(9)$"nstats"$Chr(9)$"Voice"$Chr(9)$id$Chr(9)$nPlayers[i].p.VoiceType);
-			log.LogEventString(log.GetTimeStamp()$Chr(9)$"nstats"$Chr(9)$"NetSpeed"$Chr(9)$id$Chr(9)$PlayerPawn(p).Player.CurrentNetSpeed);
-			log.LogEventString(log.GetTimeStamp()$Chr(9)$"nstats"$Chr(9)$"Fov"$Chr(9)$id$Chr(9)$PlayerPawn(p).FovAngle);
-			log.LogEventString(log.GetTimeStamp()$Chr(9)$"nstats"$Chr(9)$"MouseSens"$Chr(9)$id$Chr(9)$PlayerPawn(p).MouseSensitivity);
-			log.LogEventString(log.GetTimeStamp()$Chr(9)$"nstats"$Chr(9)$"DodgeClickTime"$Chr(9)$id$Chr(9)$PlayerPawn(p).DodgeClickTime);
+
+			if(nPlayers[i].p.TalkTexture != None){
+				Level.Game.LocalLog.LogEventString(Level.Game.LocalLog.GetTimeStamp()$Chr(9)$"nstats"$Chr(9)$"Face"$Chr(9)$nPlayers[i].p.PlayerID$Chr(9)$nPlayers[i].p.TalkTexture);
+			}
+
+			if(nPlayers[i].p.VoiceType != None){
+				Level.Game.LocalLog.LogEventString(Level.Game.LocalLog.GetTimeStamp()$Chr(9)$"nstats"$Chr(9)$"Voice"$Chr(9)$nPlayers[i].p.PlayerID$Chr(9)$nPlayers[i].p.VoiceType);
+			}
+
+			if(PlayerPawn(p) != None){
+
+				Level.Game.LocalLog.LogEventString(Level.Game.LocalLog.GetTimeStamp()$Chr(9)$"nstats"$Chr(9)$"NetSpeed"$Chr(9)$nPlayers[i].p.PlayerID$Chr(9)$PlayerPawn(p).Player.CurrentNetSpeed);
+				Level.Game.LocalLog.LogEventString(Level.Game.LocalLog.GetTimeStamp()$Chr(9)$"nstats"$Chr(9)$"MouseSens"$Chr(9)$nPlayers[i].p.PlayerID$Chr(9)$PlayerPawn(p).MouseSensitivity);
+				Level.Game.LocalLog.LogEventString(Level.Game.LocalLog.GetTimeStamp()$Chr(9)$"nstats"$Chr(9)$"DodgeClickTime"$Chr(9)$nPlayers[i].p.PlayerID$Chr(9)$PlayerPawn(p).DodgeClickTime);
+				Level.Game.LocalLog.LogEventString(Level.Game.LocalLog.GetTimeStamp()$Chr(9)$"nstats"$Chr(9)$"Fov"$Chr(9)$nPlayers[i].p.PlayerID$Chr(9)$PlayerPawn(p).FovAngle);
+
+			}
+			
+		
 			
 
+			
+		
 			return i;
 		}
 	}
+
+	return -1;
 }
 
 
@@ -108,20 +127,20 @@ function bool HandleEndGame(){
 
 
 	local int i;
-	local StatLog log;
+	//local StatLog log;
 
 	for(i = 0; i < 64; i++){
 		
 		if(nPlayers[i].id == -1){
-			break;
+			continue;
 		}
 
 		updateStats(i);
 		updateSpecialEvents(i, true);
-		log.LogEventString(log.getTimeStamp()$Chr(9)$"nstats"$Chr(9)$"SpawnKills"$Chr(9)$nPlayers[i].id$Chr(9)$nPlayers[i].spawnKills);
-		log.LogEventString(log.getTimeStamp()$Chr(9)$"nstats"$Chr(9)$"BestSpawnKillSpree"$Chr(9)$nPlayers[i].id$Chr(9)$nPlayers[i].bestSpawnKillSpree);
-		log.LogEventString(log.getTimeStamp()$Chr(9)$"nstats"$Chr(9)$"BestSpree"$Chr(9)$nPlayers[i].id$Chr(9)$nPlayers[i].bestSpree);
-		log.LogEventString(log.getTimeStamp()$Chr(9)$"nstats"$Chr(9)$"BestMulti"$Chr(9)$nPlayers[i].id$Chr(9)$nPlayers[i].bestMulti);
+		Level.Game.LocalLog.LogEventString(Level.Game.LocalLog.getTimeStamp()$Chr(9)$"nstats"$Chr(9)$"SpawnKills"$Chr(9)$nPlayers[i].id$Chr(9)$nPlayers[i].spawnKills);
+		Level.Game.LocalLog.LogEventString(Level.Game.LocalLog.getTimeStamp()$Chr(9)$"nstats"$Chr(9)$"BestSpawnKillSpree"$Chr(9)$nPlayers[i].id$Chr(9)$nPlayers[i].bestSpawnKillSpree);
+		Level.Game.LocalLog.LogEventString(Level.Game.LocalLog.getTimeStamp()$Chr(9)$"nstats"$Chr(9)$"BestSpree"$Chr(9)$nPlayers[i].id$Chr(9)$nPlayers[i].bestSpree);
+		Level.Game.LocalLog.LogEventString(Level.Game.LocalLog.getTimeStamp()$Chr(9)$"nstats"$Chr(9)$"BestMulti"$Chr(9)$nPlayers[i].id$Chr(9)$nPlayers[i].bestMulti);
 	}
 
 	if(NextMutator != None){
@@ -290,10 +309,12 @@ function ModifyPlayer(Pawn Other){
 			//updateSpecialEvents(currentPID, true);
 
 		}	
-
-		updateStats(currentPID);
-		updateSpecialEvents(currentPID, true);
-		updateSpawnInfo(currentPID);
+		
+		if(currentPID != -1){
+			updateStats(currentPID);
+			updateSpecialEvents(currentPID, true);
+			updateSpawnInfo(currentPID);
+		}
 	}
 
 	if (NextMutator != None)
