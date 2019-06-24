@@ -85,10 +85,6 @@ function int insertNewPlayer(Pawn p){
 			}
 			
 		
-			
-
-			
-		
 			return i;
 		}
 	}
@@ -171,9 +167,10 @@ function updateStats(int PlayerIndex){
 
 		Log(nPlayers[PlayerIndex].p.PlayerName$Chr(9)$" just got their best spawn kill spree ("$nPlayers[PlayerIndex].spawnKillSpree$") was ("$bestSpawnSpree$")");
 
-		nPlayers[PlayerIndex].spawnKillSpree = 0;
 
 	}
+
+	nPlayers[PlayerIndex].spawnKillSpree = 0;
 
 	if(currentSpree > bestSpree){
 		LOG(nPlayers[PlayerIndex].p.PlayerName$" just beat their best killing spree "$currentSpree$" was ("$bestSpree$")");
