@@ -11,6 +11,7 @@ var (NodeUTStats) float MultiKillTimeLimit;
 
 struct nPlayer{
 	var PlayerReplicationInfo p;
+	var Pawn pawn;
 	var int spawns;
 	var float lastSpawnTime;
 	var int id;
@@ -43,20 +44,34 @@ function int getPlayerIndex(PlayerReplicationInfo p){
 }
 
 
-function int insertNewPlayer(PlayerReplicationInfo p){
+function int insertNewPlayer(Pawn p){
 	
 	local int i;
+	local StatLog log;
+	local int id;
 	
+	log = Level.Game.LocalLog;
 	
 	for(i = 0; i < 64; i++){
 		
 	
 		if(nPlayers[i].id == -1){
-			nPlayers[i].p = p;
-			nPlayers[i].id = p.PlayerID;
+
+			nPlayers[i].p = p.PlayerReplicationInfo;
+			nPlayers[i].id = p.PlayerReplicationInfo.PlayerID;
+			nPlayers[i].pawn = p;
+
+			id = p.PlayerReplicationInfo.PlayerId;
+			
 			//LOG("Inseted new player "$p.PlayerName);
-			Level.Game.LocalLog.LogEventString(Level.TimeSeconds$Chr(9)$"nstats"$Chr(9)$"Face"$Chr(9)$p.PlayerID$Chr(9)$p.TalkTexture);
-			Level.Game.LocalLog.LogEventString(Level.TimeSeconds$Chr(9)$"nstats"$Chr(9)$"Voice"$Chr(9)$p.PlayerID$Chr(9)$p.VoiceType);
+			log.LogEventString(log.GetTimeStamp()$Chr(9)$"nstats"$Chr(9)$"Face"$Chr(9)$id$Chr(9)$nPlayers[i].p.TalkTexture);
+			log.LogEventString(log.GetTimeStamp()$Chr(9)$"nstats"$Chr(9)$"Voice"$Chr(9)$id$Chr(9)$nPlayers[i].p.VoiceType);
+			log.LogEventString(log.GetTimeStamp()$Chr(9)$"nstats"$Chr(9)$"NetSpeed"$Chr(9)$id$Chr(9)$PlayerPawn(p).Player.CurrentNetSpeed);
+			log.LogEventString(log.GetTimeStamp()$Chr(9)$"nstats"$Chr(9)$"Fov"$Chr(9)$id$Chr(9)$PlayerPawn(p).FovAngle);
+			log.LogEventString(log.GetTimeStamp()$Chr(9)$"nstats"$Chr(9)$"MouseSens"$Chr(9)$id$Chr(9)$PlayerPawn(p).MouseSensitivity);
+			log.LogEventString(log.GetTimeStamp()$Chr(9)$"nstats"$Chr(9)$"DodgeClickTime"$Chr(9)$id$Chr(9)$PlayerPawn(p).DodgeClickTime);
+			
+
 			return i;
 		}
 	}
@@ -93,6 +108,7 @@ function bool HandleEndGame(){
 
 
 	local int i;
+	local StatLog log;
 
 	for(i = 0; i < 64; i++){
 		
@@ -102,10 +118,10 @@ function bool HandleEndGame(){
 
 		updateStats(i);
 		updateSpecialEvents(i, true);
-		Level.Game.LocalLog.LogEventString(Level.TimeSeconds$Chr(9)$"nstats"$Chr(9)$"SpawnKills"$Chr(9)$nPlayers[i].id$Chr(9)$nPlayers[i].spawnKills);
-		Level.Game.LocalLog.LogEventString(Level.TimeSeconds$Chr(9)$"nstats"$Chr(9)$"BestSpawnKillSpree"$Chr(9)$nPlayers[i].id$Chr(9)$nPlayers[i].bestSpawnKillSpree);
-		Level.Game.LocalLog.LogEventString(Level.TimeSeconds$Chr(9)$"nstats"$Chr(9)$"BestSpree"$Chr(9)$nPlayers[i].id$Chr(9)$nPlayers[i].bestSpree);
-		Level.Game.LocalLog.LogEventString(Level.TimeSeconds$Chr(9)$"nstats"$Chr(9)$"BestMulti"$Chr(9)$nPlayers[i].id$Chr(9)$nPlayers[i].bestMulti);
+		log.LogEventString(log.getTimeStamp()$Chr(9)$"nstats"$Chr(9)$"SpawnKills"$Chr(9)$nPlayers[i].id$Chr(9)$nPlayers[i].spawnKills);
+		log.LogEventString(log.getTimeStamp()$Chr(9)$"nstats"$Chr(9)$"BestSpawnKillSpree"$Chr(9)$nPlayers[i].id$Chr(9)$nPlayers[i].bestSpawnKillSpree);
+		log.LogEventString(log.getTimeStamp()$Chr(9)$"nstats"$Chr(9)$"BestSpree"$Chr(9)$nPlayers[i].id$Chr(9)$nPlayers[i].bestSpree);
+		log.LogEventString(log.getTimeStamp()$Chr(9)$"nstats"$Chr(9)$"BestMulti"$Chr(9)$nPlayers[i].id$Chr(9)$nPlayers[i].bestMulti);
 	}
 
 	if(NextMutator != None){
@@ -204,15 +220,20 @@ function ScoreKill(Pawn Killer, Pawn Other){
 	local int KillerId, OtherId;
 
 
-
+	LOG(Other.Name);
 
 	if(Killer.PlayerReplicationInfo != None){
 		KillerId = getPlayerIndex(Killer.PlayerReplicationInfo);
-		LOG(Killer.PlayerReplicationInfo.PlayerName$" has died");
+
+	}else{
+		KillerId = -1;
 	}
 
 	if(Other.PlayerReplicationInfo != None){
 		OtherId = getPlayerIndex(Other.PlayerReplicationInfo);
+		//LOG(Other.PlayerReplicationInfo);
+	}else{
+		OtherId = -1;
 	}
 
 	if(KillerId != -1){
@@ -252,14 +273,18 @@ function ModifyPlayer(Pawn Other){
 
 	local int currentPID;
 
-	if(Other.PlayerReplicationInfo != None){
+	
+	LOG(Other.PlayerReplicationInfo.Name);
+
+	if(Other.PlayerReplicationInfo != None && Other.bIsPlayer){
+		
 		
 		
 		currentPID = getPlayerIndex(Other.PlayerReplicationInfo);
 
 		if(currentPID == -1){
 
-			currentPID = InsertNewPlayer(Other.PlayerReplicationInfo);
+			currentPID = InsertNewPlayer(Other);
 			//catch players that have killed themselves
 			//updateStats(currentPID);
 			//updateSpecialEvents(currentPID, true);
