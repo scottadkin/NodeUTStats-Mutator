@@ -8,6 +8,7 @@ var int CSP;
 
 var (NodeUTStats) float SpawnKillTimeLimit;
 var (NodeUTStats) float MultiKillTimeLimit;
+var (NodeUTStats) bool bIgnoreMonsters;
 
 struct nPlayer{
 	var PlayerReplicationInfo p;
@@ -23,6 +24,8 @@ struct nPlayer{
 	var int bestSpree;
 	var int currentMulti;
 	var int bestMulti;
+	var int damageDone;
+	var int damageTaken;
 };
 
 
@@ -236,10 +239,17 @@ function ScoreKill(Pawn Killer, Pawn Other){
 	local int KillerId, OtherId;
 
 
-	LOG(Other.Name);
+	LOG(Other.Class);
+	
+	
 
 	if(Killer.PlayerReplicationInfo != None){
 		KillerId = getPlayerIndex(Killer.PlayerReplicationInfo);
+
+		//check if victim is a monster
+		if(!Other.IsA('PlayerPawn')){
+			Level.Game.LocalLog.LogEventString(Level.Game.LocalLog.GetTimeStamp()$Chr(9)$"nstats"$Chr(9)$"MonsterKill"$Chr(9)$Killer.PlayerReplicationInfo.PlayerID$Chr(9)$Other.Class);
+		}
 
 	}else{
 		KillerId = -1;
@@ -285,12 +295,13 @@ function ScoreKill(Pawn Killer, Pawn Other){
 
 }
 
+
 function ModifyPlayer(Pawn Other){
 
 	local int currentPID;
 
 	
-	LOG(Other.PlayerReplicationInfo.Name);
+	//LOG(Other.PlayerReplicationInfo.Name);
 
 	if(Other.PlayerReplicationInfo != None && Other.bIsPlayer){
 		
