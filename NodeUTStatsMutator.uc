@@ -26,6 +26,7 @@ struct nPlayer{
 	var int bestMulti;
 	var int damageDone;
 	var int damageTaken;
+	//var int monsterKills;
 };
 
 
@@ -111,6 +112,15 @@ function PostBeginPlay(){
 	local int i;
 
 	LOG("¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬ NodeUTStats started ¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬");
+
+	LOG(Level.Game.gamename);
+LOG(Level.Game.gamename);
+LOG(Level.Game.gamename);
+LOG(Level.Game.gamename);
+LOG(Level.Game.gamename);
+LOG(Level.Game.gamename);
+LOG(Level.Game.gamename);
+LOG(Level.Game.gamename);
 	
 
 	for(i = 0; i < 64; i++){
@@ -122,24 +132,54 @@ function PostBeginPlay(){
 	}
 }
 
+
+function bool bMonsterHuntGame(){
+
+	
+	local string find;
+	local string gt;
+	local int searchResult;
+
+	gt = Level.Game.gamename;
+
+	find = "Monster Hunt";
+
+	searchResult = inStr(gt, find);
+	
+	if(searchResult != -1){
+		return true;
+	}
+
+	return false;
+}
+
 function bool HandleEndGame(){
 
 
 	local int i;
-	//local StatLog log;
 
-	for(i = 0; i < 64; i++){
+	
+	if(!bMonsterHuntGame()){
+
+		for(i = 0; i < 64; i++){
 		
-		if(nPlayers[i].id == -1){
-			continue;
+			if(nPlayers[i].id == -1){
+				continue;
+			}
+
+			updateStats(i);
+			updateSpecialEvents(i, true);
+
+			Level.Game.LocalLog.LogEventString(Level.Game.LocalLog.getTimeStamp()$Chr(9)$"nstats"$Chr(9)$"SpawnKills"$Chr(9)$nPlayers[i].id$Chr(9)$nPlayers[i].spawnKills);
+			Level.Game.LocalLog.LogEventString(Level.Game.LocalLog.getTimeStamp()$Chr(9)$"nstats"$Chr(9)$"BestSpawnKillSpree"$Chr(9)$nPlayers[i].id$Chr(9)$nPlayers[i].bestSpawnKillSpree);
+			Level.Game.LocalLog.LogEventString(Level.Game.LocalLog.getTimeStamp()$Chr(9)$"nstats"$Chr(9)$"BestSpree"$Chr(9)$nPlayers[i].id$Chr(9)$nPlayers[i].bestSpree);
+			Level.Game.LocalLog.LogEventString(Level.Game.LocalLog.getTimeStamp()$Chr(9)$"nstats"$Chr(9)$"BestMulti"$Chr(9)$nPlayers[i].id$Chr(9)$nPlayers[i].bestMulti);
+			//Level.Game.LocalLog.LogEventString(Level.Game.LocalLog.getTimeStamp()$Chr(9)$"nstats"$Chr(9)$"MonsterKills"$Chr(9)$nPlayers[i].id$Chr(9)$nPlayers[i].monsterKills);
 		}
 
-		updateStats(i);
-		updateSpecialEvents(i, true);
-		Level.Game.LocalLog.LogEventString(Level.Game.LocalLog.getTimeStamp()$Chr(9)$"nstats"$Chr(9)$"SpawnKills"$Chr(9)$nPlayers[i].id$Chr(9)$nPlayers[i].spawnKills);
-		Level.Game.LocalLog.LogEventString(Level.Game.LocalLog.getTimeStamp()$Chr(9)$"nstats"$Chr(9)$"BestSpawnKillSpree"$Chr(9)$nPlayers[i].id$Chr(9)$nPlayers[i].bestSpawnKillSpree);
-		Level.Game.LocalLog.LogEventString(Level.Game.LocalLog.getTimeStamp()$Chr(9)$"nstats"$Chr(9)$"BestSpree"$Chr(9)$nPlayers[i].id$Chr(9)$nPlayers[i].bestSpree);
-		Level.Game.LocalLog.LogEventString(Level.Game.LocalLog.getTimeStamp()$Chr(9)$"nstats"$Chr(9)$"BestMulti"$Chr(9)$nPlayers[i].id$Chr(9)$nPlayers[i].bestMulti);
+	}else{
+		
+		Level.Game.LocalLog.LogEventString(Level.Game.LocalLog.getTimeStamp()$Chr(9)$"Monster hunt game finished");
 	}
 
 	if(NextMutator != None){
@@ -239,7 +279,7 @@ function ScoreKill(Pawn Killer, Pawn Other){
 	local int KillerId, OtherId;
 
 
-	LOG(Other.Class);
+	//LOG(Other.Class);
 	
 	
 
@@ -247,8 +287,10 @@ function ScoreKill(Pawn Killer, Pawn Other){
 		KillerId = getPlayerIndex(Killer.PlayerReplicationInfo);
 
 		//check if victim is a monster
-		if(!Other.IsA('PlayerPawn')){
+		if(!Other.IsA('PlayerPawn') && !Other.IsA('HumanBotPlus')){
 			Level.Game.LocalLog.LogEventString(Level.Game.LocalLog.GetTimeStamp()$Chr(9)$"nstats"$Chr(9)$"MonsterKill"$Chr(9)$Killer.PlayerReplicationInfo.PlayerID$Chr(9)$Other.Class);
+
+			//nPlayers[killerId].monsterKills++;
 		}
 
 	}else{
@@ -294,6 +336,7 @@ function ScoreKill(Pawn Killer, Pawn Other){
 	}
 
 }
+
 
 
 function ModifyPlayer(Pawn Other){
