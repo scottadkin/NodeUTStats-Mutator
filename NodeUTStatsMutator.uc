@@ -114,13 +114,6 @@ function PostBeginPlay(){
 	LOG("¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬ NodeUTStats started ¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬");
 
 	LOG(Level.Game.gamename);
-LOG(Level.Game.gamename);
-LOG(Level.Game.gamename);
-LOG(Level.Game.gamename);
-LOG(Level.Game.gamename);
-LOG(Level.Game.gamename);
-LOG(Level.Game.gamename);
-LOG(Level.Game.gamename);
 	
 
 	for(i = 0; i < 64; i++){
@@ -137,18 +130,39 @@ function bool bMonsterHuntGame(){
 
 	
 	local string find;
+
 	local string gt;
 	local int searchResult;
+
 
 	gt = Level.Game.gamename;
 
 	find = "Monster Hunt";
+	
 
 	searchResult = inStr(gt, find);
-	
+
 	if(searchResult != -1){
 		return true;
 	}
+
+	find = "MonsterHunt";
+	
+	searchResult = inStr(gt, find);
+
+	if(searchResult != -1){
+		return true;
+	}
+
+	find = "Coop Game";
+
+	searchResult = inStr(gt, find);
+
+	if(searchResult != -1){
+		return true;
+	}
+
+	
 
 	return false;
 }
