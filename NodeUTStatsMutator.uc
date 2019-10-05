@@ -26,6 +26,11 @@ struct nPlayer{
 	var int bestMulti;
 	var int damageDone;
 	var int damageTaken;
+	var int netSpeed;
+	var float mouseSens;
+	var float dodgeClickTime;
+	var int fov;
+	var int settingChecks;
 	//var int monsterKills;
 };
 
@@ -48,11 +53,17 @@ function int getPlayerIndex(PlayerReplicationInfo p){
 }
 
 
+/*function getMouseSens(PlayerPawn p){
+
+	Log(p.MouseSensitivity);
+}*/
+
 function int insertNewPlayer(Pawn p){
 	
 	local int i;
 	//local StatLog log;
 	local int id;
+	local PlayerPawn potato;
 
 
 	
@@ -65,6 +76,10 @@ function int insertNewPlayer(Pawn p){
 
 			nPlayers[i].p = p.PlayerReplicationInfo;
 			nPlayers[i].id = p.PlayerReplicationInfo.PlayerID;
+			nPlayers[i].settingChecks = 0;
+			nPlayers[i].netspeed = 0;
+			nPlayers[i].mouseSens = 0;
+			nPlayers[i].fov = 0;
 			//nPlayers[i].pawn = p;
 
 			//id = p.PlayerReplicationInfo.PlayerID;
@@ -79,12 +94,19 @@ function int insertNewPlayer(Pawn p){
 				Level.Game.LocalLog.LogEventString(Level.Game.LocalLog.GetTimeStamp()$Chr(9)$"nstats"$Chr(9)$"Voice"$Chr(9)$nPlayers[i].p.PlayerID$Chr(9)$nPlayers[i].p.VoiceType);
 			}
 
+			/*if(p.isA('PlayerPawn')){
+				//Log(p.MouseSensitivity);
+
+				getMouseSens(PlayerPawn(p));
+
+			}*/
+
 			if(PlayerPawn(p) != None){
 
 				Level.Game.LocalLog.LogEventString(Level.Game.LocalLog.GetTimeStamp()$Chr(9)$"nstats"$Chr(9)$"NetSpeed"$Chr(9)$nPlayers[i].p.PlayerID$Chr(9)$PlayerPawn(p).Player.CurrentNetSpeed);
-				Level.Game.LocalLog.LogEventString(Level.Game.LocalLog.GetTimeStamp()$Chr(9)$"nstats"$Chr(9)$"MouseSens"$Chr(9)$nPlayers[i].p.PlayerID$Chr(9)$PlayerPawn(p).MouseSensitivity);
-				Level.Game.LocalLog.LogEventString(Level.Game.LocalLog.GetTimeStamp()$Chr(9)$"nstats"$Chr(9)$"DodgeClickTime"$Chr(9)$nPlayers[i].p.PlayerID$Chr(9)$PlayerPawn(p).DodgeClickTime);
-				Level.Game.LocalLog.LogEventString(Level.Game.LocalLog.GetTimeStamp()$Chr(9)$"nstats"$Chr(9)$"Fov"$Chr(9)$nPlayers[i].p.PlayerID$Chr(9)$PlayerPawn(p).FovAngle);
+				//Level.Game.LocalLog.LogEventString(Level.Game.LocalLog.GetTimeStamp()$Chr(9)$"nstats"$Chr(9)$"MouseSens"$Chr(9)$nPlayers[i].p.PlayerID$Chr(9)$PlayerPawn(p).MouseSensitivity);
+				//Level.Game.LocalLog.LogEventString(Level.Game.LocalLog.GetTimeStamp()$Chr(9)$"nstats"$Chr(9)$"DodgeClickTime"$Chr(9)$nPlayers[i].p.PlayerID$Chr(9)$PlayerPawn(p).DodgeClickTime);
+				//Level.Game.LocalLog.LogEventString(Level.Game.LocalLog.GetTimeStamp()$Chr(9)$"nstats"$Chr(9)$"Fov"$Chr(9)$nPlayers[i].p.PlayerID$Chr(9)$PlayerPawn(p).FovAngle);
 
 			}
 			
@@ -113,7 +135,9 @@ function PostBeginPlay(){
 
 	LOG("¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬ NodeUTStats started ¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬");
 
-	LOG(Level.Game.gamename);
+	//LOG(Level.Game.gamename);
+	//LOG(Caps(Level.Game.gamename));
+	//Level.Game.Spawn( class'NodeUTStatsSpawnNotify');
 	
 
 	for(i = 0; i < 64; i++){
@@ -135,9 +159,12 @@ function bool bMonsterHuntGame(){
 	local int searchResult;
 
 
-	gt = Level.Game.gamename;
+	gt = Caps(Level.Game.gamename);
+	//Log("gametype = "$ gt);
+	//gt = Caps(gt);
+	//Log("gametype.Caps = "$ gt);
 
-	find = "Monster Hunt";
+	find = Caps("Monster Hunt");
 	
 
 	searchResult = inStr(gt, find);
@@ -146,7 +173,7 @@ function bool bMonsterHuntGame(){
 		return true;
 	}
 
-	find = "MonsterHunt";
+	find = Caps("MonsterHunt");
 	
 	searchResult = inStr(gt, find);
 
@@ -154,7 +181,7 @@ function bool bMonsterHuntGame(){
 		return true;
 	}
 
-	find = "Coop Game";
+	find = Caps("Coop Game");
 
 	searchResult = inStr(gt, find);
 
@@ -202,6 +229,46 @@ function bool HandleEndGame(){
 
 	return false;
 }
+
+/*function checkPlayerSettings(Pawn Other){
+
+	local int playerIndex;
+
+	if(PlayerPawn(Other) != None){
+
+		if(Other.PlayerReplicationInfo != None){
+
+			playerIndex = getPlayerIndex(Other.PlayerReplicationInfo);
+
+			if(playerIndex != -1){
+			
+				if(nPlayers[playerIndex].netspeed != PlayerPawn(Other).Player.CurrentNetSpeed){
+					LOG("NETSPEED change for "$Other.PlayerReplicationInfo.playerName$" Changed to "$PlayerPawn(Other).Player.CurrentNetSpeed);
+					nPlayers[playerIndex].netspeed = PlayerPawn(Other).Player.CurrentNetSpeed;
+				}
+				
+				if(nPlayers[playerIndex].mouseSens != PlayerPawn(Other).MouseSensitivity){
+					LOG("Mouse sens change for " $ Other.PlayerReplicationInfo.playerName $ " Changed to " $ PlayerPawn(Other).MouseSensitivity);
+				}
+
+				if(nPlayers[playerIndex].fov != PlayerPawn(Other).FovAngle){
+					LOG("Fov change for " $ Other.PlayerReplicationInfo.playerName $ " Changed to " $ PlayerPawn(Other).FovAngle);
+				}
+
+
+				if(nPlayers[playerIndex].dodgeClickTime != PlayerPawn(Other).DodgeClickTime){
+					LOG("Dodge click time change for " $ Other.PlayerReplicationInfo.playerName $ " Changed to " $ PlayerPawn(Other).DodgeClickTime);
+				}
+
+				/*Level.Game.LocalLog.LogEventString(Level.Game.LocalLog.GetTimeStamp()$Chr(9)$"nstats"$Chr(9)$"NetSpeed"$Chr(9)$nPlayers[i].p.PlayerID$Chr(9)$PlayerPawn(p).Player.CurrentNetSpeed);
+				Level.Game.LocalLog.LogEventString(Level.Game.LocalLog.GetTimeStamp()$Chr(9)$"nstats"$Chr(9)$"MouseSens"$Chr(9)$nPlayers[i].p.PlayerID$Chr(9)$PlayerPawn(p).MouseSensitivity);
+				Level.Game.LocalLog.LogEventString(Level.Game.LocalLog.GetTimeStamp()$Chr(9)$"nstats"$Chr(9)$"DodgeClickTime"$Chr(9)$nPlayers[i].p.PlayerID$Chr(9)$PlayerPawn(p).DodgeClickTime);
+				Level.Game.LocalLog.LogEventString(Level.Game.LocalLog.GetTimeStamp()$Chr(9)$"nstats"$Chr(9)$"Fov"$Chr(9)$nPlayers[i].p.PlayerID$Chr(9)$PlayerPawn(p).FovAngle);*/
+			}
+		
+		}
+	}
+}*/
 
 
 function updateStats(int PlayerIndex){
@@ -296,26 +363,34 @@ function ScoreKill(Pawn Killer, Pawn Other){
 	//LOG(Other.Class);
 	
 	
+	if(Killer != None){
 
-	if(Killer.PlayerReplicationInfo != None){
-		KillerId = getPlayerIndex(Killer.PlayerReplicationInfo);
+		if(Killer.PlayerReplicationInfo != None){
 
-		//check if victim is a monster
-		if(!Other.IsA('PlayerPawn') && !Other.IsA('HumanBotPlus')){
-			Level.Game.LocalLog.LogEventString(Level.Game.LocalLog.GetTimeStamp()$Chr(9)$"nstats"$Chr(9)$"MonsterKill"$Chr(9)$Killer.PlayerReplicationInfo.PlayerID$Chr(9)$Other.Class);
+			//checkPlayerSettings(Killer);
 
+			KillerId = getPlayerIndex(Killer.PlayerReplicationInfo);
+
+			//check if victim is a monster
+			if(!Other.IsA('PlayerPawn') && !Other.IsA('HumanBotPlus')){
+				Level.Game.LocalLog.LogEventString(Level.Game.LocalLog.GetTimeStamp()$Chr(9)$"nstats"$Chr(9)$"MonsterKill"$Chr(9)$Killer.PlayerReplicationInfo.PlayerID$Chr(9)$Other.Class);
+	
 			//nPlayers[killerId].monsterKills++;
-		}
+			}
 
-	}else{
-		KillerId = -1;
+		}else{
+			KillerId = -1;
+		}
 	}
 
-	if(Other.PlayerReplicationInfo != None){
-		OtherId = getPlayerIndex(Other.PlayerReplicationInfo);
-		//LOG(Other.PlayerReplicationInfo);
-	}else{
-		OtherId = -1;
+	if(Other != None){
+		if(Other.PlayerReplicationInfo != None){
+			//checkPlayerSettings(Other);
+			OtherId = getPlayerIndex(Other.PlayerReplicationInfo);
+			//LOG(Other.PlayerReplicationInfo);
+		}else{
+			OtherId = -1;
+		}
 	}
 
 	if(KillerId != -1){
@@ -353,27 +428,26 @@ function ScoreKill(Pawn Killer, Pawn Other){
 
 
 
+
 function ModifyPlayer(Pawn Other){
 
 	local int currentPID;
 
-	
-	//LOG(Other.PlayerReplicationInfo.Name);
+	local NodeUTStatsPlayerReplicationInfo test;
 
 	if(Other.PlayerReplicationInfo != None && Other.bIsPlayer){
 		
 		
-		
 		currentPID = getPlayerIndex(Other.PlayerReplicationInfo);
+
+
 
 		if(currentPID == -1){
 
 			currentPID = InsertNewPlayer(Other);
-			//catch players that have killed themselves
-			//updateStats(currentPID);
-			//updateSpecialEvents(currentPID, true);
 
 		}	
+
 		
 		if(currentPID != -1){
 			updateStats(currentPID);
