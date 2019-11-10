@@ -1,14 +1,11 @@
-//=============================================================================
-// NodeUTStatsMutator.
-//=============================================================================
 class NodeUTStatsMutator expands Mutator;
-
 
 var int CSP;
 
 var (NodeUTStats) float SpawnKillTimeLimit;
 var (NodeUTStats) float MultiKillTimeLimit;
 var (NodeUTStats) bool bIgnoreMonsters;
+var (NodeUTStats) string faces[39];
 
 struct nPlayer{
 	var PlayerReplicationInfo p;
@@ -58,6 +55,17 @@ function int getPlayerIndex(PlayerReplicationInfo p){
 	Log(p.MouseSensitivity);
 }*/
 
+function string getRandomFace(){
+	
+	local string currentFace;
+	local int currentIndex;
+
+	currentIndex = Rand(38);
+
+	return faces[currentIndex];
+	
+}
+
 function int insertNewPlayer(Pawn p){
 	
 	local int i;
@@ -88,6 +96,8 @@ function int insertNewPlayer(Pawn p){
 
 			if(nPlayers[i].p.TalkTexture != None){
 				Level.Game.LocalLog.LogEventString(Level.Game.LocalLog.GetTimeStamp()$Chr(9)$"nstats"$Chr(9)$"Face"$Chr(9)$nPlayers[i].p.PlayerID$Chr(9)$nPlayers[i].p.TalkTexture);
+			}else{
+				Level.Game.LocalLog.LogEventString(Level.Game.LocalLog.GetTimeStamp()$Chr(9)$"nstats"$Chr(9)$"Face"$Chr(9)$nPlayers[i].p.PlayerID$Chr(9)$getRandomFace());
 			}
 
 			if(nPlayers[i].p.VoiceType != None){
@@ -464,4 +474,43 @@ defaultproperties
 {
      SpawnKillTimeLimit=2.000000
      MultiKillTimeLimit=3.000000
+     Faces(0)="soldierskins.hkil5vector"
+     Faces(1)="soldierskins.blkt5malcom"
+     Faces(2)="commandoskins.goth5grail"
+     Faces(3)="soldierskins.sldr5johnson"
+     Faces(4)="fcommandoskins.daco5jayce"
+     Faces(5)="fcommandoskins.goth5visse"
+     Faces(6)="commandoskins.daco5graves"
+     Faces(7)="sgirlskins.venm5sarena"
+     Faces(8)="soldierskins.raws5kregore"
+     Faces(9)="sgirlskins.army5sara"
+     Faces(10)="sgirlskins.garf5vixen"
+     Faces(11)="commandoskins.daco5boris"
+     Faces(12)="commandoskins.daco5luthor"
+     Faces(13)="commandoskins.cmdo5blake"
+     Faces(14)="commandoskins.daco5ramirez"
+     Faces(15)="fcommandoskins.daco5kyla"
+     Faces(16)="soldierskins.sldr5brock"
+     Faces(17)="commandoskins.goth5kragoth"
+     Faces(18)="sgirlskins.venm5cilia"
+     Faces(19)="fcommandoskins.goth5freylis"
+     Faces(20)="sgirlskins.garf5isis"
+     Faces(21)="fcommandoskins.daco5tanya"
+     Faces(22)="sgirlskins.army5lauren"
+     Faces(23)="soldierskins.blkt5riker"
+     Faces(24)="soldierskins.sldr5rankin"
+     Faces(25)="soldierskins.blkt5othello"
+     Faces(26)="fcommandoskins.goth5cryss"
+     Faces(27)="fcommandoskins.daco5mariana"
+     Faces(28)="soldierskins.raws5arkon"
+     Faces(29)="commandoskins.cmdo5gorn"
+     Faces(30)="fcommandoskins.goth5malise"
+     Faces(31)="sgirlskins.fbth5annaka"
+     Faces(32)="tcowmeshskins.warcowface"
+     Faces(33)="bossskins.boss5xan"
+     Faces(34)="sgirlskins.fwar5cathode"
+     Faces(35)="soldierskins.hkil5matrix"
+     Faces(36)="tskmskins.meks5disconnect"
+     Faces(37)="fcommandoskins.aphe5indina"
+     Faces(38)="soldierskins.hkil5tensor"
 }
