@@ -28,7 +28,7 @@ struct nPlayer{
 	var float dodgeClickTime;
 	var int fov;
 	var int settingChecks;
-	//var int monsterKills;
+	var int monsterKills;
 };
 
 
@@ -365,6 +365,25 @@ function UpdateSpecialEvents(int PlayerId, bool bKilled){
 }
 
 
+function LogKillDistance(Pawn Killer, Pawn Other){
+
+	local float distance;
+	
+	local int killerId;
+	local int otherId;
+
+	if(Killer.PlayerReplicationInfo != None && Other.PlayerReplicationInfo != None){
+
+		killerId = Killer.PlayerReplicationInfo.PlayerID;
+		otherId = Other.PlayerReplicationInfo.PlayerID;
+
+		distance = VSize(Killer.Location - Other.Location);
+
+		Level.Game.LocalLog.LogEventString(Level.Game.LocalLog.GetTimeStamp()$Chr(9)$"nstats" $Chr(9)$ "kill_distance" $Chr(9)$ distance $Chr(9)$ killerId $Chr(9)$ otherId);
+	}
+}
+
+
 function ScoreKill(Pawn Killer, Pawn Other){
 
 	local int KillerId, OtherId;
@@ -381,11 +400,12 @@ function ScoreKill(Pawn Killer, Pawn Other){
 
 			KillerId = getPlayerIndex(Killer.PlayerReplicationInfo);
 
+			LogKillDistance(Killer, Other);
+
+			
 			//check if victim is a monster
 			if(!Other.IsA('PlayerPawn') && !Other.IsA('HumanBotPlus')){
 				Level.Game.LocalLog.LogEventString(Level.Game.LocalLog.GetTimeStamp()$Chr(9)$"nstats"$Chr(9)$"MonsterKill"$Chr(9)$Killer.PlayerReplicationInfo.PlayerID$Chr(9)$Other.Class);
-	
-			//nPlayers[killerId].monsterKills++;
 			}
 
 		}else{
