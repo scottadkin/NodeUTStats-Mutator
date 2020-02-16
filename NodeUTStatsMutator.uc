@@ -35,6 +35,11 @@ struct nPlayer{
 var nPlayer nPlayers[64];
 
 
+function printLog(string s){
+
+	Level.Game.LocalLog.LogEventString(Level.Game.LocalLog.GetTimeStamp() $ Chr(9) $ s);
+}
+
 
 function int getPlayerIndex(PlayerReplicationInfo p){
 
@@ -87,20 +92,20 @@ function int insertNewPlayer(Pawn p){
 
 
 			if(nPlayers[i].p.TalkTexture != None){
-				Level.Game.LocalLog.LogEventString(Level.Game.LocalLog.GetTimeStamp()$Chr(9)$"nstats"$Chr(9)$"Face"$Chr(9)$nPlayers[i].p.PlayerID$Chr(9)$nPlayers[i].p.TalkTexture);
+				printLog("nstats"$Chr(9)$"Face"$Chr(9)$nPlayers[i].p.PlayerID$Chr(9)$nPlayers[i].p.TalkTexture);
 			}else{
-				Level.Game.LocalLog.LogEventString(Level.Game.LocalLog.GetTimeStamp()$Chr(9)$"nstats"$Chr(9)$"Face"$Chr(9)$nPlayers[i].p.PlayerID$Chr(9)$getRandomFace());
+				printLog("nstats"$Chr(9)$"Face"$Chr(9)$nPlayers[i].p.PlayerID$Chr(9)$getRandomFace());
 			}
 
 			if(nPlayers[i].p.VoiceType != None){
-				Level.Game.LocalLog.LogEventString(Level.Game.LocalLog.GetTimeStamp()$Chr(9)$"nstats"$Chr(9)$"Voice"$Chr(9)$nPlayers[i].p.PlayerID$Chr(9)$nPlayers[i].p.VoiceType);
+				printLog("nstats"$Chr(9)$"Voice"$Chr(9)$nPlayers[i].p.PlayerID$Chr(9)$nPlayers[i].p.VoiceType);
 			}
 
 
 
 			if(PlayerPawn(p) != None){
 
-				Level.Game.LocalLog.LogEventString(Level.Game.LocalLog.GetTimeStamp()$Chr(9)$"nstats"$Chr(9)$"NetSpeed"$Chr(9)$nPlayers[i].p.PlayerID$Chr(9)$PlayerPawn(p).Player.CurrentNetSpeed);
+				printLog("nstats"$Chr(9)$"NetSpeed"$Chr(9)$nPlayers[i].p.PlayerID$Chr(9)$PlayerPawn(p).Player.CurrentNetSpeed);
 			}
 			
 		
@@ -117,17 +122,18 @@ function updateSpawnInfo(int offset){
 	nPlayers[offset].spawns++;
 	nPlayers[offset].lastSpawnTime = Level.TimeSeconds;
 
-
-
 }
+
 
 function LogFlagLocations(){
 
 	local FlagBase currentFlag;
+	local string position;
 
 	foreach AllActors(class'FlagBase', currentFlag){
 
-		Level.Game.LocalLog.LogEventString(Level.Game.LocalLog.GetTimeStamp()$Chr(9)$"nstats"$Chr(9)$"flag_location"$Chr(9)$ currentFlag.team $ Chr(9) $ currentFlag.Location.x $ Chr(9) $ currentFlag.Location.y $ Chr(9) $ currentFlag.Location.z);
+		position = currentFlag.Location.x $ Chr(9) $ currentFlag.Location.y $ Chr(9) $ currentFlag.Location.z;
+		printLog("nstats" $Chr(9)$ "flag_location" $Chr(9)$ currentFlag.team $ Chr(9) $ position);
 	}
 }
 
@@ -135,13 +141,51 @@ function LogFlagLocations(){
 function LogSpawnLocations(){
 
 	local PlayerStart s;
-
+	local string position;
 
 	foreach AllActors(class'PlayerStart', s){
 
+		position = s.Location.x $","$ s.Location.y $","$ s.Location.z;
+		printLog("nstats" $Chr(9)$ "spawn_point" $Chr(9)$ s.Name $Chr(9)$ s.TeamNumber $Chr(9)$ position);
+		
+	}
+}
 
-		Level.Game.LocalLog.LogEventString(Level.Game.LocalLog.GetTimeStamp()$ Chr(9)$ "nstats" $Chr(9)$ "spawn_point" $Chr(9)$ s.Name $Chr(9)$ s.TeamNumber $Chr(9)$ s.Location.x $","$ s.Location.y $","$ s.Location.z);
-		log('test');
+function LogWeaponLocations(){
+
+
+	local TournamentWeapon w;
+	local string position;
+
+
+	foreach AllActors(class'TournamentWeapon', w){
+		
+		position = w.Location.x $ ","$ w.Location.y $ "," $ w.location.z;		
+		printLog( "nstats" $Chr(9)$ "weapon_location" $Chr(9)$ w.class $ Chr(9) $ w.Name $ Chr(9) $ position);
+	}
+}
+
+function LogHealthLocations(){
+
+	local TournamentHealth h;
+	local string position;
+
+	foreach AllActors(class'TournamentHealth', h){
+		
+		position = h.Location.x $ "," $ h.location.y $ "," $ h.location.z;
+		printLog("nstats" $ Chr(9) $ "pickup_location" $ Chr(9) $ h.class $ Chr(9) $ h.Name $ Chr(9) $ position);
+	}
+}
+
+function LogPickupLocations(){
+
+	local TournamentPickup p;
+	local string position;
+
+	foreach AllActors(class'TournamentPickup', p){
+		
+		position = p.Location.x $ "," $p.location.y $ "," $ p.location.z;
+		printLog("nstats" $ Chr(9) $ "pickup_location" $ Chr(9) $ p.class $ Chr(9) $ p.Name $ Chr(9) $ position);
 	}
 }
 
@@ -155,6 +199,9 @@ function PostBeginPlay(){
 
 	LogSpawnLocations();
 	LogFlagLocations();
+	LogWeaponLocations();
+	LogHealthLocations();
+	LogPickupLocations();
 
 	for(i = 0; i < 64; i++){
 	
@@ -227,16 +274,16 @@ function bool HandleEndGame(){
 			updateStats(i);
 			updateSpecialEvents(i, true);
 
-			Level.Game.LocalLog.LogEventString(Level.Game.LocalLog.getTimeStamp()$Chr(9)$"nstats"$Chr(9)$"SpawnKills"$Chr(9)$nPlayers[i].id$Chr(9)$nPlayers[i].spawnKills);
-			Level.Game.LocalLog.LogEventString(Level.Game.LocalLog.getTimeStamp()$Chr(9)$"nstats"$Chr(9)$"BestSpawnKillSpree"$Chr(9)$nPlayers[i].id$Chr(9)$nPlayers[i].bestSpawnKillSpree);
-			Level.Game.LocalLog.LogEventString(Level.Game.LocalLog.getTimeStamp()$Chr(9)$"nstats"$Chr(9)$"BestSpree"$Chr(9)$nPlayers[i].id$Chr(9)$nPlayers[i].bestSpree);
-			Level.Game.LocalLog.LogEventString(Level.Game.LocalLog.getTimeStamp()$Chr(9)$"nstats"$Chr(9)$"BestMulti"$Chr(9)$nPlayers[i].id$Chr(9)$nPlayers[i].bestMulti);
+			printLog("nstats"$Chr(9)$"SpawnKills"$Chr(9)$nPlayers[i].id$Chr(9)$nPlayers[i].spawnKills);
+			printLog("nstats"$Chr(9)$"BestSpawnKillSpree"$Chr(9)$nPlayers[i].id$Chr(9)$nPlayers[i].bestSpawnKillSpree);
+			printLog("nstats"$Chr(9)$"BestSpree"$Chr(9)$nPlayers[i].id$Chr(9)$nPlayers[i].bestSpree);
+			printLog("nstats"$Chr(9)$"BestMulti"$Chr(9)$nPlayers[i].id$Chr(9)$nPlayers[i].bestMulti);
 			//Level.Game.LocalLog.LogEventString(Level.Game.LocalLog.getTimeStamp()$Chr(9)$"nstats"$Chr(9)$"MonsterKills"$Chr(9)$nPlayers[i].id$Chr(9)$nPlayers[i].monsterKills);
 		}
 
 	}else{
 		
-		Level.Game.LocalLog.LogEventString(Level.Game.LocalLog.getTimeStamp()$Chr(9)$"Monster hunt game finished");
+		printLog("Monster hunt game finished");
 	}
 
 	if(NextMutator != None){
@@ -265,7 +312,7 @@ function updateStats(int PlayerIndex){
 
 		nPlayers[PlayerIndex].bestSpawnKillSpree = currentSpawnSpree;
 
-		Log(nPlayers[PlayerIndex].p.PlayerName$Chr(9)$" just got their best spawn kill spree ("$nPlayers[PlayerIndex].spawnKillSpree$") was ("$bestSpawnSpree$")");
+		//Log(nPlayers[PlayerIndex].p.PlayerName$Chr(9)$" just got their best spawn kill spree ("$nPlayers[PlayerIndex].spawnKillSpree$") was ("$bestSpawnSpree$")");
 
 
 	}
@@ -273,7 +320,7 @@ function updateStats(int PlayerIndex){
 	nPlayers[PlayerIndex].spawnKillSpree = 0;
 
 	if(currentSpree > bestSpree){
-		LOG(nPlayers[PlayerIndex].p.PlayerName$" just beat their best killing spree "$currentSpree$" was ("$bestSpree$")");
+		//LOG(nPlayers[PlayerIndex].p.PlayerName$" just beat their best killing spree "$currentSpree$" was ("$bestSpree$")");
 		nPlayers[PlayerIndex].bestSpree = currentSpree;
 	}
 }
@@ -337,6 +384,8 @@ function LogKillDistance(Pawn Killer, Pawn Other){
 	
 	local int killerId;
 	local int otherId;
+	local string killerLocation;
+	local string victimLocation;
 
 	if(Killer.PlayerReplicationInfo != None && Other.PlayerReplicationInfo != None){
 
@@ -345,10 +394,11 @@ function LogKillDistance(Pawn Killer, Pawn Other){
 
 		distance = VSize(Killer.Location - Other.Location);
 
-		Level.Game.LocalLog.LogEventString(Level.Game.LocalLog.GetTimeStamp()$Chr(9)$"nstats" $Chr(9)$ "kill_distance" $Chr(9)$ distance $Chr(9)$ killerId $Chr(9)$ otherId);
-		Level.Game.LocalLog.LogEventString(Level.Game.LocalLog.GetTimeStamp()$Chr(9)$"nstats" $Chr(9)$ "kill_location" $Chr(9) $ 
-		killerId $ Chr(9) $ Killer.Location.x $ "," $ Killer.Location.y $ "," $ Killer.Location.z $ Chr(9) $ 
-		otherId $ Chr(9) $ Other.Location.x $ "," $ Other.Location.y $ "," $ Other.Location.z);
+		killerLocation = killerId $ Chr(9) $ Killer.Location.x $ "," $ Killer.Location.y $ "," $ Killer.Location.z;
+		victimLocation = otherId $ Chr(9) $ Other.Location.x $ "," $ Other.Location.y $ "," $ Other.Location.z;
+
+		printLog("nstats" $Chr(9)$ "kill_distance" $Chr(9)$ distance $Chr(9)$ killerId $Chr(9)$ otherId);
+		printLog("nstats" $Chr(9)$ "kill_location" $Chr(9) $  killerLocation $ Chr(9) $ victimLocation);
 	}
 }
 
@@ -374,7 +424,7 @@ function ScoreKill(Pawn Killer, Pawn Other){
 			
 			//check if victim is a monster
 			if(!Other.IsA('PlayerPawn') && !Other.IsA('HumanBotPlus')){
-				Level.Game.LocalLog.LogEventString(Level.Game.LocalLog.GetTimeStamp()$Chr(9)$"nstats"$Chr(9)$"MonsterKill"$Chr(9)$Killer.PlayerReplicationInfo.PlayerID$Chr(9)$Other.Class);
+				printLog("nstats"$Chr(9)$"MonsterKill"$Chr(9)$Killer.PlayerReplicationInfo.PlayerID$Chr(9)$Other.Class);
 			}
 
 		}else{
