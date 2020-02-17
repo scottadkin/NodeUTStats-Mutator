@@ -29,6 +29,8 @@ struct nPlayer{
 	var int fov;
 	var int settingChecks;
 	var int monsterKills;
+	var float shortestTimeBetweenKills;
+	var float longestTImeBetweenKills;
 };
 
 
@@ -89,7 +91,9 @@ function int insertNewPlayer(Pawn p){
 			nPlayers[i].netspeed = 0;
 			nPlayers[i].mouseSens = 0;
 			nPlayers[i].fov = 0;
-
+			nPlayers[i].longestTimeBetweenKills = -1;
+			nPlayers[i].shortestTimeBetweenKills = -1;
+			nPlayers[i].lastKillTime = Level.TimeSeconds;
 
 			if(nPlayers[i].p.TalkTexture != None){
 				printLog("nstats"$Chr(9)$"Face"$Chr(9)$nPlayers[i].p.PlayerID$Chr(9)$nPlayers[i].p.TalkTexture);
@@ -278,6 +282,8 @@ function bool HandleEndGame(){
 			printLog("nstats"$Chr(9)$"BestSpawnKillSpree"$Chr(9)$nPlayers[i].id$Chr(9)$nPlayers[i].bestSpawnKillSpree);
 			printLog("nstats"$Chr(9)$"BestSpree"$Chr(9)$nPlayers[i].id$Chr(9)$nPlayers[i].bestSpree);
 			printLog("nstats"$Chr(9)$"BestMulti"$Chr(9)$nPlayers[i].id$Chr(9)$nPlayers[i].bestMulti);
+			printLog("nstats"$Chr(9)$"shortestTimeBetweenKills" $Chr(9)$ nPlayers[i].id $Chr(9) $ nPlayers[i].shortestTimeBetweenKills);
+			printLog("nstats"$Chr(9)$"longestTimeBetweenKills" $Chr(9)$ nPlayers[i].id $Chr(9) $ nPlayers[i].longestTimeBetweenKills);
 			//Level.Game.LocalLog.LogEventString(Level.Game.LocalLog.getTimeStamp()$Chr(9)$"nstats"$Chr(9)$"MonsterKills"$Chr(9)$nPlayers[i].id$Chr(9)$nPlayers[i].monsterKills);
 		}
 
@@ -405,6 +411,26 @@ function LogKillDistance(Pawn Killer, Pawn Other){
 }
 
 
+function updateKillTimes(int index, float killTime){
+
+	//local nPlayer p;
+	local float offset;
+
+	//p = nPlayers[index];
+
+	offset = killTime - nPlayers[index].lastKillTime;
+	
+	if(offset < nPlayers[index].shortestTimeBetweenKills || nPlayers[index].shortestTimeBetweenKills == -1){		
+		nPlayers[index].shortestTimeBetweenKills = offset;
+	}
+
+	if(offset > nPlayers[index].longestTimeBetweenKills || nPlayers[index].longestTimeBetweenKills == -1){
+		nPlayers[index].longestTimeBetweenKills = offset;
+	}
+
+}
+
+
 function ScoreKill(Pawn Killer, Pawn Other){
 
 	local int KillerId, OtherId;
@@ -422,6 +448,8 @@ function ScoreKill(Pawn Killer, Pawn Other){
 			KillerId = getPlayerIndex(Killer.PlayerReplicationInfo);
 
 			LogKillDistance(Killer, Other);
+
+			
 
 			
 			//check if victim is a monster
@@ -448,6 +476,8 @@ function ScoreKill(Pawn Killer, Pawn Other){
 		
 		
 		UpdateSpecialEvents(KillerId,false);
+
+		updateKillTimes(KillerId, Level.TimeSeconds);
 
 		nPlayers[KillerId].lastKillTime = Level.TimeSeconds;
 		
@@ -487,19 +517,13 @@ function ModifyPlayer(Pawn Other){
 	local NodeUTStatsPlayerReplicationInfo test;
 
 	if(Other.PlayerReplicationInfo != None && Other.bIsPlayer){
-		
-		
+			
 		currentPID = getPlayerIndex(Other.PlayerReplicationInfo);
 
-
-
 		if(currentPID == -1){
-
 			currentPID = InsertNewPlayer(Other);
-
 		}	
-
-		
+	
 		if(currentPID != -1){
 			updateStats(currentPID);
 			updateSpecialEvents(currentPID, true);
