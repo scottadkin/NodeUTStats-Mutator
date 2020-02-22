@@ -37,6 +37,18 @@ struct nPlayer{
 var nPlayer nPlayers[64];
 
 
+struct flagInfo{
+
+	var float x;
+	var float y;
+	var float z;
+	var int team;
+};
+
+
+var flagInfo nFlags[4];
+
+
 function printLog(string s){
 
 	Level.Game.LocalLog.LogEventString(Level.Game.LocalLog.GetTimeStamp() $ Chr(9) $ s);
@@ -129,12 +141,35 @@ function updateSpawnInfo(int offset){
 }
 
 
+function initFlags(){
+
+	local int i;
+
+	for(i = 0; i < 4; i++){
+
+		nFlags[i].team = -1;
+		nFlags[i].x = 0;
+		nFlags[i].y = 0;
+		nFlags[i].z = 0;
+	}
+}
+
 function LogFlagLocations(){
 
 	local FlagBase currentFlag;
 	local string position;
 
+	initFlags();
+
 	foreach AllActors(class'FlagBase', currentFlag){
+
+		if(currentFlag.team >= 0 && currentFlag.team <= 3){
+
+			nFlags[currentFlag.team].team = currentFlag.team;
+			nFlags[currentFlag.team].x = currentFlag.Location.x;
+			nFlags[currentFlag.team].y = currentFlag.Location.y;
+			nFlags[currentFlag.team].z = currentFlag.Location.z;
+		}
 
 		position = currentFlag.Location.x $ Chr(9) $ currentFlag.Location.y $ Chr(9) $ currentFlag.Location.z;
 		printLog("nstats" $Chr(9)$ "flag_location" $Chr(9)$ currentFlag.team $ Chr(9) $ position);
@@ -430,6 +465,66 @@ function updateKillTimes(int index, float killTime){
 
 }
 
+function flagInfo getFlag(int team){
+
+	return nFlags[team];
+
+}
+
+function vector getFlagBaseLocation(int team){
+
+	local flagInfo redFlag;
+	local flagInfo blueFlag;
+	local vector currentLocation;
+
+	redFlag = getFlag(0);
+	blueFlag = getFlag(1);
+
+	if(team == 0){
+		
+		currentLocation.x = redFlag.x;// = [redFlag.x, redFlag.y, redFlag.z];
+		currentLocation.y = redFlag.y;
+		currentLocation.z = redFlag.z;
+
+	}else if(team == 1){
+	
+		currentLocation.x = blueFlag.x;
+		currentLocation.y = blueFlag.y;
+		currentLocation.z = blueFlag.z;
+	}
+
+
+	return currentLocation;
+}
+
+function LogFlagKill(Pawn Killer, Pawn Victim){
+
+	local float distanceToCap;
+	local float distanceToBase;
+	local float killDistance;
+	local vector myBase;
+	local vector enemyBase;
+	local int victimTeam;
+
+	victimTeam = Victim.PlayerReplicationInfo.team;
+
+	killDistance = VSize(Killer.Location - Victim.Location);
+
+	
+	if(victimTeam == 0){
+		myBase = getFlagBaseLocation(0);
+		enemyBase = getFlagBaseLocation(1);
+	}else{
+		myBase = getFlagBaseLocation(1);
+		enemyBase = getFlagBaseLocation(0);		
+	}
+
+	distanceToBase = VSize(Victim.Location - myBase);
+	distanceToCap = VSize(Victim.Location - enemyBase);
+
+	printLog("nstats"$Chr(9)$"flag_kill"$Chr(9)$ Victim.PlayerReplicationInfo.PlayerId $Chr(9) $ killDistance $ Chr(9) $ distanceToBase $ Chr(9) $ distanceToCap);
+}
+
 
 function ScoreKill(Pawn Killer, Pawn Other){
 
@@ -463,10 +558,12 @@ function ScoreKill(Pawn Killer, Pawn Other){
 	}
 
 	if(Other != None){
+
 		if(Other.PlayerReplicationInfo != None){
 			//checkPlayerSettings(Other);
 			OtherId = getPlayerIndex(Other.PlayerReplicationInfo);
 			//LOG(Other.PlayerReplicationInfo);
+
 		}else{
 			OtherId = -1;
 		}
@@ -533,6 +630,22 @@ function ModifyPlayer(Pawn Other){
 
 	if (NextMutator != None)
       NextMutator.ModifyPlayer(Other);
+}
+
+
+function bool PreventDeath(Pawn Killed, Pawn Killer, name damageType, vector HitLocation){
+
+	if(Killed.PlayerReplicationInfo != None){
+
+		if(Killed.PlayerReplicationInfo.HasFlag != None){
+			
+			logFlagKill(Killer, Killed);
+		}
+	}
+
+	if ( NextMutator != None )
+		return NextMutator.PreventDeath(Killed,Killer, damageType,HitLocation);
+	return false;
 }
 
 defaultproperties
