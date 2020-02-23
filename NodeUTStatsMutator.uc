@@ -241,6 +241,7 @@ function PostBeginPlay(){
 	LogWeaponLocations();
 	LogHealthLocations();
 	LogPickupLocations();
+	LogDomPoints();
 
 	for(i = 0; i < 64; i++){
 	
@@ -523,6 +524,18 @@ function LogFlagKill(Pawn Killer, Pawn Victim){
 	distanceToCap = VSize(Victim.Location - enemyBase);
 
 	printLog("nstats"$Chr(9)$"flag_kill"$Chr(9)$ Killer.PlayerReplicationInfo.PlayerId $Chr(9)$ Victim.PlayerReplicationInfo.PlayerId $Chr(9) $ killDistance $ Chr(9) $ distanceToBase $ Chr(9) $ distanceToCap);
+}
+
+
+function logDomPoints(){
+
+	local int i;
+	local ControlPoint p;
+
+	foreach AllActors(class'ControlPoint', p){
+	
+		printLog("nstats"$Chr(9)$"dom_point"$Chr(9)$ p.PointName $Chr(9)$ p.Location.x $","$ p.Location.y $","$ p.Location.z);
+	}
 }
 
 
