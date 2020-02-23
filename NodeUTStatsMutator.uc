@@ -522,7 +522,7 @@ function LogFlagKill(Pawn Killer, Pawn Victim){
 	distanceToBase = VSize(Victim.Location - myBase);
 	distanceToCap = VSize(Victim.Location - enemyBase);
 
-	printLog("nstats"$Chr(9)$"flag_kill"$Chr(9)$ Victim.PlayerReplicationInfo.PlayerId $Chr(9) $ killDistance $ Chr(9) $ distanceToBase $ Chr(9) $ distanceToCap);
+	printLog("nstats"$Chr(9)$"flag_kill"$Chr(9)$ Killer.PlayerReplicationInfo.PlayerId $Chr(9)$ Victim.PlayerReplicationInfo.PlayerId $Chr(9) $ killDistance $ Chr(9) $ distanceToBase $ Chr(9) $ distanceToCap);
 }
 
 
