@@ -228,6 +228,21 @@ function LogPickupLocations(){
 	}
 }
 
+
+function LogAmmoLocations(){
+
+	local TournamentAmmo a;
+	local string position;
+
+	foreach AllActors(class'TournamentAmmo', a){
+		
+		position = a.Location.x$","$a.location.y$","$a.location.z;
+		
+		printLog("nstats" $ Chr(9) $ "ammo_location" $ Chr(9) $ a.class $ Chr(9) $ a.name $ Chr(9) $ position);
+
+	}
+}
+
 function PostBeginPlay(){
 
 	local int i;
@@ -241,6 +256,7 @@ function PostBeginPlay(){
 	LogWeaponLocations();
 	LogHealthLocations();
 	LogPickupLocations();
+	LogAmmoLocations();
 	LogDomPoints();
 
 	for(i = 0; i < 64; i++){
