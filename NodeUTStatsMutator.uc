@@ -413,8 +413,10 @@ function UpdateSpecialEvents(int PlayerId, bool bKilled){
 			nPlayers[PlayerId].bestMulti = currentMulti;
 		}
 
-		currentMulti = 0;
-		currentSpree = 0;
+		nPlayers[PlayerId].currentMulti = 0;
+		nPlayers[PlayerId].currentSpree = 0;
+
+
 		
 	}else{
 	
